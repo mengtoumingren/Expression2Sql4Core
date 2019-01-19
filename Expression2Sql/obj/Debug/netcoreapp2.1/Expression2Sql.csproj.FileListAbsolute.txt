@@ -1,0 +1,9 @@
+E:\visual studio 2017\Projects\Expression2Sql\Expression2Sql\bin\Debug\netcoreapp2.1\Expression2Sql.deps.json
+E:\visual studio 2017\Projects\Expression2Sql\Expression2Sql\bin\Debug\netcoreapp2.1\Expression2Sql.dll
+E:\visual studio 2017\Projects\Expression2Sql\Expression2Sql\bin\Debug\netcoreapp2.1\Expression2Sql.pdb
+E:\visual studio 2017\Projects\Expression2Sql\Expression2Sql\obj\Debug\netcoreapp2.1\Expression2Sql.csprojAssemblyReference.cache
+E:\visual studio 2017\Projects\Expression2Sql\Expression2Sql\obj\Debug\netcoreapp2.1\Expression2Sql.csproj.CoreCompileInputs.cache
+E:\visual studio 2017\Projects\Expression2Sql\Expression2Sql\obj\Debug\netcoreapp2.1\Expression2Sql.AssemblyInfoInputs.cache
+E:\visual studio 2017\Projects\Expression2Sql\Expression2Sql\obj\Debug\netcoreapp2.1\Expression2Sql.AssemblyInfo.cs
+E:\visual studio 2017\Projects\Expression2Sql\Expression2Sql\obj\Debug\netcoreapp2.1\Expression2Sql.dll
+E:\visual studio 2017\Projects\Expression2Sql\Expression2Sql\obj\Debug\netcoreapp2.1\Expression2Sql.pdb

@@ -1,0 +1,12 @@
+E:\visual studio 2017\Projects\Expression2Sql\IDbConnectionExtend\bin\Debug\netcoreapp2.1\IDbConnectionExtend.deps.json
+E:\visual studio 2017\Projects\Expression2Sql\IDbConnectionExtend\bin\Debug\netcoreapp2.1\IDbConnectionExtend.dll
+E:\visual studio 2017\Projects\Expression2Sql\IDbConnectionExtend\bin\Debug\netcoreapp2.1\IDbConnectionExtend.pdb
+E:\visual studio 2017\Projects\Expression2Sql\IDbConnectionExtend\bin\Debug\netcoreapp2.1\Expression2Sql.dll
+E:\visual studio 2017\Projects\Expression2Sql\IDbConnectionExtend\bin\Debug\netcoreapp2.1\Expression2Sql.pdb
+E:\visual studio 2017\Projects\Expression2Sql\IDbConnectionExtend\obj\Debug\netcoreapp2.1\IDbConnectionExtend.csprojAssemblyReference.cache
+E:\visual studio 2017\Projects\Expression2Sql\IDbConnectionExtend\obj\Debug\netcoreapp2.1\IDbConnectionExtend.csproj.CoreCompileInputs.cache
+E:\visual studio 2017\Projects\Expression2Sql\IDbConnectionExtend\obj\Debug\netcoreapp2.1\IDbConnectionExtend.AssemblyInfoInputs.cache
+E:\visual studio 2017\Projects\Expression2Sql\IDbConnectionExtend\obj\Debug\netcoreapp2.1\IDbConnectionExtend.AssemblyInfo.cs
+E:\visual studio 2017\Projects\Expression2Sql\IDbConnectionExtend\obj\Debug\netcoreapp2.1\IDbConnectionExtend.csproj.CopyComplete
+E:\visual studio 2017\Projects\Expression2Sql\IDbConnectionExtend\obj\Debug\netcoreapp2.1\IDbConnectionExtend.dll
+E:\visual studio 2017\Projects\Expression2Sql\IDbConnectionExtend\obj\Debug\netcoreapp2.1\IDbConnectionExtend.pdb
