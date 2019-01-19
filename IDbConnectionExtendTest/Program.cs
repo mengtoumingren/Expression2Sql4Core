@@ -65,13 +65,14 @@ namespace IDbConnectionExtendTest
                 var count1 = con.Count<MsgModel2>();
                 var msgs2 = con.Query<MsgModel2>(m => m.Id ==10);
                 var msg = msgs2.FirstOrDefault();
-                msg.PhoneNum = "sdfsdfdfsdf";
-                con.Add(msg);
-                msg.PhoneNum = "13344444444";
-                con.Update(msg);
+                if(msg!=null)
+                {
+                    msg.PhoneNum = "sdfsdfdfsdf";
+                    con.Add(msg);
+                    msg.PhoneNum = "13344444444";
+                    con.Update(msg);
+                }
                 con.Delete<MsgModel2>(m => m.Id == 10);
-
-
                 //事务 成功时返回 true， 失败时 返回 false 会调用回滚
                 con.Transaction(cmd =>
                 {
