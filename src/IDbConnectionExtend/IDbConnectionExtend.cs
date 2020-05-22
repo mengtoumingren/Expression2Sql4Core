@@ -7,12 +7,17 @@ using System.Data.SqlClient;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Text;
 
 namespace IDbConnectionExtend
 {
     public static class IDbConnectionExtend
     {
+        private static Dictionary<Type, object> dicReaderGetterForType;
+        private static Dictionary<Type, object> dicRowGetterForType;
+        private static object funLock;
+
         static IDbConnectionExtend()
         {
             //通过静态属性DatabaseType或者静态方法Init均可配置数据库类型
@@ -305,14 +310,7 @@ namespace IDbConnectionExtend
         {
             return ExecuteReader<IList<T>>(cmd, sql, param, parameters, reader =>
             {
-                var tempList = new List<T>();
-                while (reader.Read())
-                {
-                    var obj = (T)Activator.CreateInstance(typeof(T));
-                    SetObjectValue<T>(obj, reader);
-                    tempList.Add(obj);
-                }
-                return tempList;
+                return reader.ToList<T>();
             });
         }
 
@@ -328,14 +326,7 @@ namespace IDbConnectionExtend
         {
             return ExecuteReader<IList<T>>(con, sql, param, parameters, reader =>
             {
-                var tempList = new List<T>();
-                while (reader.Read())
-                {
-                    var obj = (T)Activator.CreateInstance(typeof(T));
-                    SetObjectValue<T>(obj, reader);
-                    tempList.Add(obj);
-                }
-                return tempList;
+                return reader.ToList<T>();
             });
         }
 
@@ -657,5 +648,224 @@ namespace IDbConnectionExtend
             }
         }
 
+        public static List<T> ToList<T>(this DataTable tb)
+        {
+            var tempList = new List<T>();
+            if (tb != null && tb.Rows.Count > 0)
+            {
+
+                foreach (DataRow row in tb.Rows)
+                {
+                    if (typeof(T).FullName.Contains("System."))
+                        tempList.Add(Helper.GetDataRowValueByIndex<T>(row, 0));
+                    else
+                    {
+                        dynamic getter = GetRowValueGetter<T>();
+                        tempList.Add(getter.GetValue(row));
+                    }
+                }
+            }
+            return tempList;
+        }
+
+        public static List<T> ToList<T>(this IDataReader reader)
+        {
+            var tempList = new List<T>();
+
+            while (reader.Read())
+            {
+                if (typeof(T).FullName.Contains("System."))
+                    tempList.Add(Helper.GetReaderValueByIndex<T>(reader, 0));
+                else
+                {
+                    dynamic getValue = GetReaderValueGetter<T>();
+                    tempList.Add(getValue.GetValue(reader));
+                }
+            }
+            return tempList;
+        }
+
+        /// <summary>
+        /// 获取赋值委托
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <returns></returns>
+        private static object GetReaderValueGetter<T>()
+        {
+            if (!dicReaderGetterForType.ContainsKey(typeof(T)))
+            {
+                lock (funLock)
+                {
+                    if (!dicReaderGetterForType.ContainsKey(typeof(T)))
+                    {
+                        var type = AssemblyMaker.MakeDataReaderGetter<T>();
+                        var builder = Activator.CreateInstance(type);
+                        dicReaderGetterForType.Add(typeof(T), builder);
+                    }
+                    return dicReaderGetterForType[typeof(T)];
+                }
+            }
+            return dicReaderGetterForType[typeof(T)];
+        }
+
+        private static object GetRowValueGetter<T>()
+        {
+            if (!dicRowGetterForType.ContainsKey(typeof(T)))
+            {
+                lock (funLock)
+                {
+                    if (!dicRowGetterForType.ContainsKey(typeof(T)))
+                    {
+                        var type = AssemblyMaker.MakeDataRowGetter<T>();
+                        var builder = Activator.CreateInstance(type);
+                        dicRowGetterForType.Add(typeof(T), builder);
+                    }
+                    return dicRowGetterForType[typeof(T)];
+                }
+            }
+            return dicReaderGetterForType[typeof(T)];
+        }
+
     }
+
+    #region emit赋值
+
+    public class Helper
+    {
+        public static T GetReaderValueByKey<T>(IDataReader reader, string name)
+        {
+            try
+            {
+                object value = reader[name];
+                if (value is DBNull)
+                    return default;
+                else
+                {
+                    return (T)value;
+                }
+
+            }
+            catch (Exception)
+            {
+                return default;
+            }
+        }
+        public static T GetReaderValueByIndex<T>(IDataReader reader, int index)
+        {
+            try
+            {
+                object value = reader[index];
+                if (value is DBNull)
+                    return default;
+                else
+                    return (T)value;
+            }
+            catch (Exception)
+            {
+                return default;
+            }
+        }
+
+        public static T GetDataRowValueByKey<T>(DataRow row, string key)
+        {
+            try
+            {
+                object value = row[key];
+                if (value is DBNull)
+                    return default;
+                else
+                    value = Convert.ChangeType(value, typeof(T));
+                return (T)value;
+            }
+            catch (Exception)
+            {
+                return default;
+            }
+        }
+
+        public static T GetDataRowValueByIndex<T>(DataRow row, int index)
+        {
+            try
+            {
+                object value = row[index];
+                if (value is DBNull)
+                    return default;
+                else
+                    value = Convert.ChangeType(value, typeof(T));
+                return (T)value;
+            }
+            catch (Exception)
+            {
+                return default;
+            }
+        }
+    }
+
+    internal class AssemblyMaker
+    {
+        public static Type MakeDataRowGetter<T>()
+        {
+            return Make<T, DataRow>();
+        }
+        public static Type MakeDataReaderGetter<T>()
+        {
+            return Make<T, IDataReader>();
+        }
+        private static Type Make<T, SourceType>()
+        {
+            var assembly = new AssemblyName("SetValueDemo_" + typeof(T).FullName);
+            var assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assembly, AssemblyBuilderAccess.Run);
+
+            var moduleBuilder = assemblyBuilder.DefineDynamicModule( "SetValue.dll");
+
+            var typeBuilder = moduleBuilder.DefineType("SetValue_" + typeof(T).FullName, TypeAttributes.Public);
+
+
+            MakeGetValueFromReaderMethod<T, SourceType>(typeBuilder, typeof(SourceType) is IDataReader ? typeof(Helper).GetMethod("GetReaderValueByKey") : typeof(Helper).GetMethod("GetDataRowValueByKey"));
+
+            typeBuilder.CreateType();
+            //assemblyBuilder.Save("SetValueDemo_" + typeof(T).FullName);
+            return typeBuilder;
+        }
+
+
+        private static void MakeGetValueFromReaderMethod<T, SourceType>(TypeBuilder typeBuilder, MethodInfo getValueMethod)
+        {
+            var methodBuilder = typeBuilder.DefineMethod("GetValue", MethodAttributes.Public);
+            var inputType = typeof(SourceType);
+            methodBuilder.SetParameters(inputType);
+            var returnType = typeof(T);
+            methodBuilder.SetReturnType(returnType);
+
+
+            var il = methodBuilder.GetILGenerator();
+            var lable_ret = il.DefineLabel();
+
+            il.DeclareLocal(returnType);
+
+            il.Emit(OpCodes.Nop);
+            il.Emit(OpCodes.Newobj, returnType.GetConstructor(new Type[] { }));
+
+            foreach (PropertyInfo property in returnType.GetProperties())
+            {
+                il.Emit(OpCodes.Dup);
+                il.Emit(OpCodes.Ldarg_1);
+                il.Emit(OpCodes.Ldstr, property.Name);
+                var getGUIDValue = getValueMethod.MakeGenericMethod(new Type[] { property.PropertyType });
+                il.Emit(OpCodes.Call, getGUIDValue);
+                il.Emit(OpCodes.Callvirt, returnType.GetMethod("set_" + property.Name, new Type[] { property.PropertyType }));
+                il.Emit(OpCodes.Nop);
+            }
+
+            il.Emit(OpCodes.Stloc_0);
+            il.Emit(OpCodes.Br, lable_ret);
+
+
+            il.MarkLabel(lable_ret);
+            il.Emit(OpCodes.Ldloc_0);
+            il.Emit(OpCodes.Ret);
+        }
+    }
+
+    #endregion
 }
