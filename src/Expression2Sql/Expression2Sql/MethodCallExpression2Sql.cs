@@ -46,7 +46,7 @@ namespace Expression2Sql
 				Expression2SqlProvider.Where(expression.Object, sqlPack);
 			}
 			Expression2SqlProvider.Where(expression.Arguments[0], sqlPack);
-			sqlPack += " like '%' +";
+			sqlPack += " LIKE '%' +";
 			Expression2SqlProvider.Where(expression.Arguments[1], sqlPack);
 			sqlPack += " + '%'";
 		}
@@ -58,7 +58,7 @@ namespace Expression2Sql
 				Expression2SqlProvider.Where(expression.Object, sqlPack);
 			}
 			Expression2SqlProvider.Where(expression.Arguments[0], sqlPack);
-			sqlPack += " like '%' +";
+			sqlPack += " LIKE '%' +";
 			Expression2SqlProvider.Where(expression.Arguments[1], sqlPack);
 		}
 
@@ -69,7 +69,7 @@ namespace Expression2Sql
 				Expression2SqlProvider.Where(expression.Object, sqlPack);
 			}
 			Expression2SqlProvider.Where(expression.Arguments[0], sqlPack);
-			sqlPack += " like ";
+			sqlPack += " LIKE ";
 			Expression2SqlProvider.Where(expression.Arguments[1], sqlPack);
 			sqlPack += " + '%'";
 		}

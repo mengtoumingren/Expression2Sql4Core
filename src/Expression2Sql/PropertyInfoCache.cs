@@ -114,7 +114,7 @@ namespace Expression2Sql
         /// <returns></returns>
         public static string FieldNameAsPropertyName(string fullName,params string[] fieldNames)
         {
-            return FieldNameToPropertyName( keyValues[fullName].DicFieldProperty, (field, property) => string.Format("{0} as {1}", field, property), fieldNames);
+            return FieldNameToPropertyName( keyValues[fullName].DicFieldProperty, (field, property) => string.Format("{0} AS {1}", field, property), fieldNames);
         }
         /// <summary>
         /// 获取 字段 as model的属性名
@@ -124,7 +124,7 @@ namespace Expression2Sql
         public static string FieldNameAsPropertyName(string fullName)
         {
 
-            return FieldNameToPropertyName( keyValues[fullName].DicFieldProperty, (field, property) => string.Format("{0} as {1}", field, property), keyValues[fullName].DicPropertyField.Values.ToArray());
+            return FieldNameToPropertyName( keyValues[fullName].DicFieldProperty, (field, property) => string.Format("{0} AS {1}", field, property), keyValues[fullName].DicPropertyField.Values.ToArray());
         }
 
         public static string GetTableName(string fullName)
