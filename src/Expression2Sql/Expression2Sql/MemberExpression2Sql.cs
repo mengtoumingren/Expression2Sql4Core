@@ -51,6 +51,34 @@ namespace Expression2Sql
 
 		protected override SqlPack Where(MemberExpression expression, SqlPack sqlPack)
 		{
+			// DateTime dateTime = new DateTime(2012, 1, 1);
+			// Where(u => u.TransDate > dateTime)
+			if (expression.Expression != null && expression.Expression.NodeType is ExpressionType.Constant && expression.Member.MemberType == MemberTypes.Field)
+			{
+				var paramValue = ((ConstantExpression)expression.Expression).Value;
+				var param = paramValue.GetType().GetField(expression.Member.Name).GetValue(paramValue);
+
+				sqlPack.AddDbParameter(param);
+				return sqlPack;
+			}
+
+			// Bill bill = new Bill();
+			// bill.TransDate = dateTime;
+			// Where(u => u.TransDate > bill.TransDate)
+			if (expression.Expression != null && expression.Expression.NodeType is ExpressionType.MemberAccess && expression.Member.MemberType == MemberTypes.Property)
+			{
+				var objExpression = (MemberExpression)expression.Expression;
+				var objValue = ((ConstantExpression)objExpression.Expression).Value;
+
+				// bill
+				var obj = objValue.GetType().GetField(objExpression.Member.Name).GetValue(objValue);
+				// bill.TransDate
+				var param = obj.GetType().GetProperty(expression.Member.Name).GetValue(obj);
+
+				sqlPack.AddDbParameter(param);
+				return sqlPack;
+			}
+
 			sqlPack.SetTableAlias(PropertyInfoCache.GetTableName(expression.Member.DeclaringType.FullName));
 			string tableAlias = sqlPack.GetTableAlias(PropertyInfoCache.GetTableName(expression.Member.DeclaringType.FullName));
 			if (!string.IsNullOrWhiteSpace(tableAlias))
@@ -113,31 +141,31 @@ namespace Expression2Sql
 
 		protected override SqlPack Max(MemberExpression expression, SqlPack sqlPack)
 		{
-			sqlPack.Sql.AppendFormat("select max({0}) from {1}", PropertyInfoCache.GetFieldName(expression.Member.DeclaringType.FullName, expression.Member.Name), PropertyInfoCache.GetTableName(expression.Member.DeclaringType.FullName));
+			sqlPack.Sql.AppendFormat("SELECT MAX({0}) FROM {1}", PropertyInfoCache.GetFieldName(expression.Member.DeclaringType.FullName, expression.Member.Name), PropertyInfoCache.GetTableName(expression.Member.DeclaringType.FullName));
 			return sqlPack;
 		}
 
 		protected override SqlPack Min(MemberExpression expression, SqlPack sqlPack)
 		{
-			sqlPack.Sql.AppendFormat("select min({0}) from {1}", PropertyInfoCache.GetFieldName(expression.Member.DeclaringType.FullName, expression.Member.Name), PropertyInfoCache.GetTableName(expression.Member.DeclaringType.FullName));
+			sqlPack.Sql.AppendFormat("SELECT MIN({0}) FROM {1}", PropertyInfoCache.GetFieldName(expression.Member.DeclaringType.FullName, expression.Member.Name), PropertyInfoCache.GetTableName(expression.Member.DeclaringType.FullName));
 			return sqlPack;
 		}
 
 		protected override SqlPack Avg(MemberExpression expression, SqlPack sqlPack)
 		{
-			sqlPack.Sql.AppendFormat("select avg({0}) from {1}", PropertyInfoCache.GetFieldName(expression.Member.DeclaringType.FullName, expression.Member.Name), PropertyInfoCache.GetTableName(expression.Member.DeclaringType.FullName));
+			sqlPack.Sql.AppendFormat("SELECT AVG({0}) FROM {1}", PropertyInfoCache.GetFieldName(expression.Member.DeclaringType.FullName, expression.Member.Name), PropertyInfoCache.GetTableName(expression.Member.DeclaringType.FullName));
 			return sqlPack;
 		}
 
 		protected override SqlPack Count(MemberExpression expression, SqlPack sqlPack)
 		{
-			sqlPack.Sql.AppendFormat("select count({0}) from {1}", PropertyInfoCache.GetFieldName(expression.Member.DeclaringType.FullName, expression.Member.Name), PropertyInfoCache.GetTableName(expression.Member.DeclaringType.FullName));
+			sqlPack.Sql.AppendFormat("SELECT COUNT({0}) FROM {1}", PropertyInfoCache.GetFieldName(expression.Member.DeclaringType.FullName, expression.Member.Name), PropertyInfoCache.GetTableName(expression.Member.DeclaringType.FullName));
 			return sqlPack;
 		}
 
 		protected override SqlPack Sum(MemberExpression expression, SqlPack sqlPack)
 		{
-			sqlPack.Sql.AppendFormat("select sum({0}) from {1}", PropertyInfoCache.GetFieldName(expression.Member.DeclaringType.FullName, expression.Member.Name), PropertyInfoCache.GetTableName(expression.Member.DeclaringType.FullName));
+			sqlPack.Sql.AppendFormat("SELECT SUM({0}) FROM {1}", PropertyInfoCache.GetFieldName(expression.Member.DeclaringType.FullName, expression.Member.Name), PropertyInfoCache.GetTableName(expression.Member.DeclaringType.FullName));
 			return sqlPack;
 		}
 	}

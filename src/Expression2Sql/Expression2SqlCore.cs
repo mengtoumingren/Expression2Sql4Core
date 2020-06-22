@@ -55,7 +55,7 @@ namespace Expression2Sql
                 this._sqlPack.SetTableAlias(tableName);
 			}
 
-			return "select {0}\nfrom " + ModelCache<T>._TableName + " " + this._sqlPack.GetTableAlias(ModelCache<T>._TableName);
+			return "SELECT {0}\nFROM " + ModelCache<T>._TableName + " " + this._sqlPack.GetTableAlias(ModelCache<T>._TableName);
 		}
 
         public Expression2SqlCore<T> Select(Expression<Func<T, object>> expression = null)
@@ -308,13 +308,13 @@ namespace Expression2Sql
 		public Expression2SqlCore<T> InnerJoin<T2>(Expression<Func<T, T2, bool>> expression)
 		{
             PropertyInfoCache.InitCacheInfo<T2>();
-            return JoinParser(expression, "inner ");
+            return JoinParser(expression, "INNER ");
 		}
 		public Expression2SqlCore<T> InnerJoin<T2, T3>(Expression<Func<T2, T3, bool>> expression)
 		{
             PropertyInfoCache.InitCacheInfo<T2>();
             PropertyInfoCache.InitCacheInfo<T3>();
-            return JoinParser2(expression, "inner ");
+            return JoinParser2(expression, "INNER ");
 		}
 
 		public Expression2SqlCore<T> LeftJoin<T2>(Expression<Func<T, T2, bool>> expression)
@@ -326,50 +326,50 @@ namespace Expression2Sql
 		{
             PropertyInfoCache.InitCacheInfo<T2>();
             PropertyInfoCache.InitCacheInfo<T3>();
-            return JoinParser2(expression, "left ");
+            return JoinParser2(expression, "LEFT ");
 		}
 
 		public Expression2SqlCore<T> RightJoin<T2>(Expression<Func<T, T2, bool>> expression)
         {
             PropertyInfoCache.InitCacheInfo<T2>();
-            return JoinParser(expression, "right ");
+            return JoinParser(expression, "RIGHT ");
 		}
 		public Expression2SqlCore<T> RightJoin<T2, T3>(Expression<Func<T2, T3, bool>> expression)
 		{
             PropertyInfoCache.InitCacheInfo<T2>();
             PropertyInfoCache.InitCacheInfo<T3>();
-            return JoinParser2(expression, "right ");
+            return JoinParser2(expression, "RIGHT ");
 		}
 
 		public Expression2SqlCore<T> FullJoin<T2>(Expression<Func<T, T2, bool>> expression)
 		{
             PropertyInfoCache.InitCacheInfo<T2>();
-            return JoinParser(expression, "full ");
+            return JoinParser(expression, "FULL ");
 		}
 		public Expression2SqlCore<T> FullJoin<T2, T3>(Expression<Func<T2, T3, bool>> expression)
 		{
             PropertyInfoCache.InitCacheInfo<T2>();
             PropertyInfoCache.InitCacheInfo<T3>();
-            return JoinParser2(expression, "full ");
+            return JoinParser2(expression, "FULL ");
 		}
 
 		public Expression2SqlCore<T> Where(Expression<Func<T, bool>> expression)
 		{
-			this._sqlPack += "\nwhere";
+			this._sqlPack += "\nWHERE";
 			Expression2SqlProvider.Where(expression.Body, this._sqlPack);
 			return this;
 		}
 
 		public Expression2SqlCore<T> GroupBy(Expression<Func<T, object>> expression)
 		{
-			this._sqlPack += "\ngroup by ";
+			this._sqlPack += "\nGROUP BY ";
 			Expression2SqlProvider.GroupBy(expression.Body, this._sqlPack);
 			return this;
 		}
 
 		public Expression2SqlCore<T> OrderBy(Expression<Func<T, object>> expression)
 		{
-			this._sqlPack += "\norder by ";
+			this._sqlPack += "\nORDER BY ";
 			Expression2SqlProvider.OrderBy(expression.Body, this._sqlPack);
 			return this;
 		}
@@ -404,7 +404,7 @@ namespace Expression2Sql
 			this._sqlPack.IsSingleTable = true;
 			if (expression == null)
 			{
-				this._sqlPack.Sql.AppendFormat("select count(*) from {0}", ModelCache<T>._TableName);
+				this._sqlPack.Sql.AppendFormat("SELECT COUNT(*) FROM {0}", ModelCache<T>._TableName);
 			}
 			else
 			{
@@ -428,7 +428,7 @@ namespace Expression2Sql
 			this._sqlPack.IsSingleTable = true;
 			string tableName = ModelCache<T>._TableName;
 			this._sqlPack.SetTableAlias(tableName);
-			this._sqlPack += "delete from " + tableName;
+			this._sqlPack += "DELETE FROM " + tableName;
 			return this;
 		}
 
@@ -436,7 +436,7 @@ namespace Expression2Sql
 		{
 			this._sqlPack.Clear();
 			this._sqlPack.IsSingleTable = true;
-			this._sqlPack += "update " + ModelCache<T>._TableName + " set ";
+			this._sqlPack += "UPDATE " + ModelCache<T>._TableName + " SET ";
 			Expression2SqlProvider.Update(expression.Body, this._sqlPack);
 			return this;
 		}

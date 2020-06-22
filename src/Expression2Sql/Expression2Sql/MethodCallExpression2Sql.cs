@@ -46,7 +46,7 @@ namespace Expression2Sql
 				Expression2SqlProvider.Where(expression.Object, sqlPack);
 			}
 			Expression2SqlProvider.Where(expression.Arguments[0], sqlPack);
-			sqlPack += " like '%' +";
+			sqlPack += " LIKE '%' +";
 			Expression2SqlProvider.Where(expression.Arguments[1], sqlPack);
 			sqlPack += " + '%'";
 		}
@@ -58,7 +58,7 @@ namespace Expression2Sql
 				Expression2SqlProvider.Where(expression.Object, sqlPack);
 			}
 			Expression2SqlProvider.Where(expression.Arguments[0], sqlPack);
-			sqlPack += " like '%' +";
+			sqlPack += " LIKE '%' +";
 			Expression2SqlProvider.Where(expression.Arguments[1], sqlPack);
 		}
 
@@ -69,7 +69,7 @@ namespace Expression2Sql
 				Expression2SqlProvider.Where(expression.Object, sqlPack);
 			}
 			Expression2SqlProvider.Where(expression.Arguments[0], sqlPack);
-			sqlPack += " like ";
+			sqlPack += " LIKE ";
 			Expression2SqlProvider.Where(expression.Arguments[1], sqlPack);
 			sqlPack += " + '%'";
 		}
@@ -78,11 +78,14 @@ namespace Expression2Sql
 		protected override SqlPack Where(MethodCallExpression expression, SqlPack sqlPack)
 		{
 			var key = expression.Method;
+
+			//是否为泛型方法
 			if (key.IsGenericMethod)
 			{
 				key = key.GetGenericMethodDefinition();
 			}
 
+			//自定义扩展方法执行
 			Action<MethodCallExpression, SqlPack> action;
 			if (_Methods.TryGetValue(key.Name, out action))
 			{
@@ -90,7 +93,13 @@ namespace Expression2Sql
 				return sqlPack;
 			}
 
-			throw new NotImplementedException("无法解析方法" + expression.Method);
+			//尝试获取方法结果，放到参数里
+			//Where(x=>x.Date = GetSysDate())
+			sqlPack.AddDbParameter(Expression.Lambda(expression).Compile().DynamicInvoke());
+
+			return sqlPack;
+
+			//throw new NotImplementedException("无法解析方法" + expression.Method);
 		}
 	}
 }
