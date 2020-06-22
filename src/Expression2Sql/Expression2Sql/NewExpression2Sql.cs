@@ -16,6 +16,7 @@
  */
 #endregion
 
+using System;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -64,6 +65,19 @@ namespace Expression2Sql
 			{
 				Expression2SqlProvider.OrderBy(item, sqlPack);
 			}
+			return sqlPack;
+		}
+
+		protected override SqlPack Where(NewExpression expression, SqlPack sqlPack)
+		{
+			object[] args = new object[expression.Arguments.Count];
+
+			for (int i = 0; i < expression.Arguments.Count; i++)
+			{
+				args[i] = (expression.Arguments[i] as ConstantExpression).Value;
+			}
+
+			sqlPack.AddDbParameter(Activator.CreateInstance(expression.Type, args));
 			return sqlPack;
 		}
 	}

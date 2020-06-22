@@ -51,6 +51,34 @@ namespace Expression2Sql
 
 		protected override SqlPack Where(MemberExpression expression, SqlPack sqlPack)
 		{
+			// DateTime dateTime = new DateTime(2012, 1, 1);
+			// Where(u => u.TransDate > dateTime)
+			if (expression.Expression != null && expression.Expression.NodeType is ExpressionType.Constant && expression.Member.MemberType == MemberTypes.Field)
+			{
+				var paramValue = ((ConstantExpression)expression.Expression).Value;
+				var param = paramValue.GetType().GetField(expression.Member.Name).GetValue(paramValue);
+
+				sqlPack.AddDbParameter(param);
+				return sqlPack;
+			}
+
+			// Bill bill = new Bill();
+			// bill.TransDate = dateTime;
+			// Where(u => u.TransDate > bill.TransDate)
+			if (expression.Expression != null && expression.Expression.NodeType is ExpressionType.MemberAccess && expression.Member.MemberType == MemberTypes.Property)
+			{
+				var objExpression = (MemberExpression)expression.Expression;
+				var objValue = ((ConstantExpression)objExpression.Expression).Value;
+
+				// bill
+				var obj = objValue.GetType().GetField(objExpression.Member.Name).GetValue(objValue);
+				// bill.TransDate
+				var param = obj.GetType().GetProperty(expression.Member.Name).GetValue(obj);
+
+				sqlPack.AddDbParameter(param);
+				return sqlPack;
+			}
+
 			sqlPack.SetTableAlias(PropertyInfoCache.GetTableName(expression.Member.DeclaringType.FullName));
 			string tableAlias = sqlPack.GetTableAlias(PropertyInfoCache.GetTableName(expression.Member.DeclaringType.FullName));
 			if (!string.IsNullOrWhiteSpace(tableAlias))
